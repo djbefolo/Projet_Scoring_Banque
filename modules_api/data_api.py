@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import os
 import streamlit as st
 import streamlit.components.v1 as components
 
@@ -18,7 +19,9 @@ def load_all_data(sample_size):
     #data['age_bins'] = (pd.cut(data['DAYS_BIRTH'], bins=bins)).astype(str)
 
     # Charger le dataframe 'application_train.csv'
-    train_set = pd.read_csv('data\application_train.csv', nrows=sample_size)
+    file_path = os.path.abspath('data/application_train.csv')
+    train_set = pd.read_csv(file_path, nrows=sample_size)
+    #train_set = pd.read_csv('data\application_train.csv', nrows=sample_size)
 
 
     return data, y_pred_test_export, train_set
