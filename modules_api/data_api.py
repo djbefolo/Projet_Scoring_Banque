@@ -1,15 +1,19 @@
 import pandas as pd
 import numpy as np
-import os
 import streamlit as st
 import streamlit.components.v1 as components
+
+###---------- load data prob -------- 
+def load_prob_data(sample_size):
+    dataset_exported = pd.read_csv("data/dataset_exported.csv", nrows=sample_size)
+    return dataset_exported
 
 ###---------- load data -------- 
 def load_all_data(sample_size):
     
-    df = pd.read_csv("data/dataset_exported.csv", nrows=sample_size)
+    data = pd.read_csv("data/df_final.csv", nrows=sample_size)
 
-    data = df.drop("Unnamed: 0", axis=1)
+    #data = df.drop("Unnamed: 0", axis=1)
 
     y_pred_test_export = pd.read_csv("data/y_pred_test_export.csv")
 
