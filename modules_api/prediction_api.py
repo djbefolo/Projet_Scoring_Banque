@@ -33,9 +33,9 @@ def load_model(model_to_load):
 '''Prédire un client avec un modele  '''
 
 def predict_client(model,X):
-    X = X.drop(['SK_ID_CURR'],axis=1)
+    #X = X.drop(['SK_ID_CURR'],axis=1)
     X_transformed = preprocessing(X)
-    model = load_model(model)
+    #model = load_model(model) #il connait deja le model qui a été chargé donc plus nécessaire
     y_pred = model.predict(X_transformed)
     y_proba = model.predict_proba(X_transformed)
     return y_pred,y_proba
@@ -45,12 +45,16 @@ def predict_client(model,X):
 def predict_client_par_ID(model_to_use,id_client):
     sample_size= 20000
     data_set = load_dataset(sample_size)
-    client=data_set[data_set['SK_ID_CURR']==id_client].drop(['SK_ID_CURR','TARGET'],axis=1)
-    print(client)
+    client=data_set[data_set['SK_ID_CURR']==id_client].drop(['DAYS_EMPLOYED_ANOM','TARGET'],axis=1)
+    if client.empty:
+        raise ValueError(f"Client with ID {id_client} not found in the dataset.")
+    
+    print(client.head())
     client_preproceced = preprocessing(client)
-    model = load_model(model_to_use)
-    y_pred = model.predict(client_preproceced)
-    y_proba = model.predict_proba(client_preproceced)
+
+    model1 = load_model(model_to_use)
+    y_pred,y_proba = predict_client(model1,client)
+     
     return y_pred,y_proba
 
 
