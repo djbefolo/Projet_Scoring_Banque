@@ -308,20 +308,23 @@ def file_selector(folder_path='.'):
     selected_filename = st.selectbox('Selectionner un fichier client', filenames)
     return os.path.join(folder_path, selected_filename)
 
+
 def show_client_prediction():
-    st.subheader("Selectionner source des données du client")
-    selected_choice = st.radio("",('Client existant dans le dataset','Nouveau client'))
+    client_ids = data['SK_ID_CURR'].unique()
+    st.subheader("Sélectionner source des données du client")
+    selected_choice = st.radio("", ('Client existant dans le dataset', 'Nouveau client'))
 
     if selected_choice == 'Client existant dans le dataset':
-        client_id = st.number_input("Donnez Id du Client",100002)
+        selected_client_id = st.selectbox("Sélectionnez l'ID du Client", client_ids)
         if st.button('Prédire Client'):
-            y_pred,y_proba = predict_client_par_ID("randomForest",client_id)
-            st.info('Probabilité de solvabilité du client : '+str(100*y_proba[0][0])+' %')
-            st.info("Notez que 100% => Client non slovable ")
+            y_pred, y_proba = predict_client_par_ID("randomForest", selected_client_id)
+            st.info('Probabilité de solvabilité du client : ' + str(100 * y_proba[0][0]) + ' %')
+            st.info("Notez que 100% => Client non solvable ")
 
-            if(y_proba[0][0]<seuil_risque):
+            #seuil_risque = 0.5  # Assurez-vous de définir la valeur de seuil_risque correctement
+            if y_proba[0][0] < seuil_risque:
                 st.success('Client prédit comme solvable')
-            if(y_proba[0][0]>=seuil_risque):
+            else:
                 st.error('Client prédit comme non solvable !')
 
     if selected_choice == 'Nouveau client':   
