@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 gunicorn>=21.2,<22.0 
 alembic==1.12.0
 altair==5.1.1
@@ -90,3 +91,9 @@ watchdog==3.0.0
 websocket-client==1.6.2
 Werkzeug==2.3.7
 zipp==3.16.2
+=======
+pandas
+numpy
+Flask
+streamlit
+>>>>>>> e7c302f411cf525fb27ab0fab29e3a4ac9bf8fff

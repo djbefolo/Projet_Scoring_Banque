@@ -408,3 +408,107 @@ if selected_item == 'Model':
 
 if selected_item == 'predire_client':
     show_client_prediction()
+
+
+
+##................................Ajout de l'API...........................................................................
+if selected_item == 'predire_client':
+    selected_item = "predire_client"
+
+seuil_risque = st.sidebar.slider("Seuil de Solvabilité", min_value=0.0, max_value=1.0, value=0.5, step=0.01)
+
+
+if selected_item == 'predire_client':
+    # Cette partie permet de sélectionner la source des données du client.
+    st.subheader("Prédire la solvabilité d'un nouveau client")
+    st.write("Sélectionnez la source des données du client:")
+
+    selected_choice = st.radio("", ('Client existant dans le dataset', 'Nouveau client'))
+
+    if selected_choice == 'Client existant dans le dataset':
+        selected_client_id = st.selectbox("Sélectionnez l'ID du Client", client_ids)
+        if st.button('Prédire Client'):
+            # Obtenez les données du client existant dans le dataset.
+            client = data[data['SK_ID_CURR'] == selected_client_id]
+            
+            # Affichez les informations du client.
+            display_client_info(
+                str(client['SK_ID_CURR'].values[0]),
+                str(client['AMT_INCOME_TOTAL'].values[0]),
+                str(round(client['DAYS_BIRTH'].values[0])),
+                str(round(client['DAYS_EMPLOYED'] / -365).values[0])
+            )
+
+            # Prédisez la solvabilité du client.
+            y_pred, y_proba = predict_client_par_ID("randomForest", selected_client_id)
+            st.info('Probabilité de solvabilité du client : ' + str(100 * y_proba[0][0]) + ' %')
+
+            # Affichez la prédiction sous forme de barre de progression.
+            client_prediction = st.progress(0)
+            for percent_complete in range(int(100 * y_proba[0][0])):
+                time.sleep(0.01)
+                client_prediction.progress(percent_complete + 1)
+
+            # Affichez si le client est solvable ou non en fonction du seuil de risque.
+            if y_proba[0][0] < seuil_risque:
+                st.success('Client prédit comme solvable')
+            else:
+                st.error('Client prédit comme non solvable !')
+
+            # Affichez tous les détails du client.
+            st.subheader("Tous les détails du client :")
+            st.write(client)
+
+            # Affichez un graphique en barres montrant le nombre de clients par décennie d'âge.
+            age_bins = data['age_bins'].value_counts(sort=False)
+            d = {'Ages par Décennie': age_bins.index, 'Nombre de clients par Décennie': age_bins.values}
+            ages_decennie = pd.DataFrame(data=d)
+            ages_decennie['Ages par Décennie'] = ages_decennie['Ages par Décennie'].astype(str)
+            idx_decennie = ages_decennie[ages_decennie['Ages par Décennie'] == client['age_bins'].values[0]].index
+            colors = ['lightslategray'] * len(ages_decennie['Nombre de clients par Décennie'])
+            colors[idx_decennie.values[0]] = 'crimson'
+
+            fig = go.Figure(data=[go.Bar(
+                x=ages_decennie['Ages par Décennie'],
+                y=ages_decennie['Nombre de clients par Décennie'],
+                marker_color=colors
+            )])
+            fig.update_layout(title_text='Nombre de Clients par Décennie')
+            st.plotly_chart(fig)
+
+            # Affichez un graphique en ligne montrant la probabilité de solvabilité en fonction des revenus.
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(y=data['pred_prob'], x=data['AMT_INCOME_TOTAL'], mode='markers',
+                                     name='Revenus des autres clients'))
+            fig.add_trace(go.Scatter(y=client['pred_prob'], x=client['AMT_INCOME_TOTAL'], mode='markers',
+                                     name='Revenu de ce Client', marker=dict(size=[25])))
+            st.plotly_chart(fig)
+
+    if selected_choice == 'Nouveau client':
+        st.subheader("Prédire la solvabilité d'un nouveau client")
+        filename = file_selector()
+        st.write('Fichier du nouveau client sélectionné `%s`' % filename)
+
+        if st.button('Prédire Client'):
+            # Chargez les données du nouveau client à partir du fichier CSV.
+            nouveau_client = pd.read_csv(filename)
+            
+            # Prédisez la solvabilité du nouveau client en utilisant votre modèle.
+            y_pred, y_proba = predict_client("randomForest", nouveau_client)
+
+            # Envoyez les données du client à votre API Flask pour la prédiction.
+            api_url = 'https://scoringbackend-98d331e52ab2.herokuapp.com/predict'  # Remplacez par l'URL de votre API Flask.
+            response = requests.post(api_url, json={'data': nouveau_client.to_dict()})
+
+            if response.status_code == 200:
+                result = response.json()
+                st.info('Probabilité de solvabilité du client : ' + str(100 * result['probability'][0]) + ' %')
+
+                # Affichez si le client est solvable ou non en fonction du seuil de risque.
+                if result['probability'][0] < seuil_risque:
+                    st.success('Client prédit comme solvable')
+                else:
+                    st.error('Client prédit comme non solvable !')
+            else:
+                st.error('Erreur lors de la requête à l\'API Flask.')
+
