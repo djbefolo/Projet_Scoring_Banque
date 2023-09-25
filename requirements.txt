@@ -1,4 +1,4 @@
-
+  
 gunicorn>=21.2,<22.0 
 streamlit==<streamlit_version>
 numpy==<numpy_version>
@@ -7,3 +7,4 @@ plotly==<plotly_version>
 matplotlib==<matplotlib_version>
 seaborn==<seaborn_version>
 scikit-learn==<scikit-learn_version>
+ 
