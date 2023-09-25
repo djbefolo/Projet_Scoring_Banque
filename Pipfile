@@ -1,0 +1,19 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+gunicorn = "<22.0,>=21.2"
+streamlit = "==1.25.0"
+numpy = ">=1.19.3"
+pandas = ">=1.3.0"
+plotly = "*"
+matplotlib = "*"
+seaborn = "*"
+scikit-learn = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.11"
