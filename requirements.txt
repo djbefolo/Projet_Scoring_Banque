@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 gunicorn>=21.2,<22.0 
 streamlit==<streamlit_version>
 numpy==<numpy_version>
