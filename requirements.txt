@@ -6,3 +6,5 @@ plotly
 matplotlib
 seaborn
 scikit-learn
+altair==4.1.0
+
