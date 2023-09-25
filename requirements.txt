@@ -1,10 +1,10 @@
   
 gunicorn>=21.2,<22.0 
-streamlit==<streamlit_version>
-numpy==<numpy_version>
-pandas==<pandas_version>
-plotly==<plotly_version>
-matplotlib==<matplotlib_version>
-seaborn==<seaborn_version>
-scikit-learn==<scikit-learn_version>
+streamlit==1.25.0
+numpy>=1.19.3
+pandas>=1.3.0
+plotly
+matplotlib
+seaborn
+scikit-learn
  
